@@ -1,0 +1,109 @@
+`timescale 1ns / 1ps
+module tb
+#(
+  parameter data_size = 8
+);
+
+
+ // Inputs
+ reg clk;
+ reg reset;
+ reg [data_size-1:0] a1;
+ reg [data_size-1:0] a2;
+ reg [data_size-1:0] b1;
+ reg [data_size-1:0] b2;
+ reg [4:0] i,j;
+ reg [2:0] v;
+
+ // Outputs
+ wire [2*data_size-1:0] c1;
+ wire [2*data_size-1:0] c2;
+ wire [2*data_size-1:0] c3;
+ wire [2*data_size-1:0] c4;
+
+
+ // Instantiate the Unit Under Test (UUT)
+  systolictop test(
+  .clk(clk), 
+  .reset(reset), 
+  .a1(a1), 
+  .a2(a2), 
+  .b1(b1), 
+  .b2(b2), 
+  .c1(c1), 
+  .c2(c2), 
+  .c3(c3), 
+  .c4(c4),
+  .i(i),
+  .j(j)
+ );
+
+ initial begin
+  // Initialize Inputs
+  clk = 0;
+  reset = 0;
+  a1 = 0;
+  a2 = 0;
+  b1 = 0;
+  b2 = 0;
+  i = 0;
+  j = 0;
+
+  // assume we have a matrix A
+  //[1,2,3,4,5,6,7,0]
+  //[2,3,4,5,6,7,0,1]
+  //[3,4,5,6,7,0,1,2]
+  //[4,5,6,7,0,1,2,3]
+  //[5,6,7,0,1,2,3,4]
+  //[6,7,0,1,2,3,4,5]
+  //[7,0,1,2,3,4,5,6]
+  //[0,1,2,3,4,5,6,7]
+
+    // assume we have a matrix B
+  //[0,1,2,3,4,5,6,7]
+  //[1,2,3,4,5,6,7,0]
+  //[2,3,4,5,6,7,0,1]
+  //[3,4,5,6,7,0,1,2]
+  //[4,5,6,7,0,1,2,3]
+  //[5,6,7,0,1,2,3,4]
+  //[6,7,0,1,2,3,4,5]
+  //[7,0,1,2,3,4,5,6]
+
+
+  // Wait 100 ns for global reset to finish
+  #5 reset = 1;
+  #5 reset = 0;
+  #10; a1 = 1 ; a2 = 0;  b1 = 0; b2 = 0; 
+
+  for (i = 0; i <= 7; i = i+2)
+    for (j = 0; j <= 7; j = j+2)
+    begin
+        #10; a1 = (i + 2) % 8 ; a2 = (i + 2) % 8;  b1 = (j + 1) % 8; b2 = (j + 1) % 8;
+        #10; a1 = (i + 3) % 8 ; a2 = (i + 3) % 8;  b1 = (j + 2) % 8; b2 = (j + 2) % 8;
+        #10; a1 = (i + 4) % 8 ; a2 = (i + 4) % 8;  b1 = (j + 3) % 8; b2 = (j + 3) % 8;
+        #10; a1 = (i + 5) % 8 ; a2 = (i + 5) % 8;  b1 = (j + 4) % 8; b2 = (j + 4) % 8;
+        #10; a1 = (i + 6) % 8 ; a2 = (i + 6) % 8;  b1 = (j + 5) % 8; b2 = (j + 5) % 8;
+        #10; a1 = (i + 7) % 8 ; a2 = (i + 7) % 8;  b1 = (j + 6) % 8; b2 = (j + 6) % 8;
+        #10; a1 = (i + 8) % 8 ; a2 = (i + 8) % 8;  b1 = (j + 7) % 8; b2 = (j + 7) % 8;
+        if (j != 6) begin
+          #10; a1 = i + 1 ; a2 = i + 1;  b1 = (j + 2) % 8; b2 = j;
+        end
+        else if (i != 6) begin
+          #10; a1 = i + 3 ; a2 = i + 1;  b1 = (j + 2) % 8; b2 = j;
+        end
+        else begin
+          #10; a1 = 0 ; a2 = i + 1;  b1 = (j + 2) % 8; b2 = j;         
+        end
+    end
+  #100;
+  $stop;
+
+ end
+ 
+ always begin
+   #5 clk = ~clk;
+
+ end
+      
+endmodule
+
